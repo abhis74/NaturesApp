@@ -9,6 +9,8 @@ const tourController = require('./../controllers/tourController');
 router
   .route('/tour-5-cheap')
   .get(tourController.aliasTopTours, tourController.getAllTours);
+
+router.route('/tour-stats').get(tourController.getTouresStats);
 router
   .route('/')
   .get(tourController.getAllTours)

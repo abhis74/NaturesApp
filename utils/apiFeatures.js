@@ -3,6 +3,7 @@ class APIFeatures {
     this.query = query;
     this.queryString = queryString;
   }
+
   filter() {
     const queryObj = { ...this.queryString };
     const exclutedFields = ['page', 'sort', 'limit', 'fields'];
@@ -45,6 +46,7 @@ class APIFeatures {
     // }
     return this;
   }
+
   paginate() {
     // 4) Pagination
     // page=2&limit=10 (1-10, ,page 1,)( 10-20 ,page 2, )

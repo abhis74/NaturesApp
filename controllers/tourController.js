@@ -1,4 +1,4 @@
-const Tour = require('./../models/tourModel');
+const Tour = require('../models/tourModel');
 const APIFeatures = require('../utils/apiFeatures');
 // const tours = JSON.parse(
 //   fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`),
@@ -135,6 +135,34 @@ exports.deleteTour = async (req, res) => {
   try {
     await Tour.findByIdAndDelete(req.params.id);
     res.status(204).json({ status: 'success', message: 'Tour Deleted' });
+  } catch (error) {
+    res.status(400).json({ status: 'fail', message: 'Invalid Id Sent!' });
+  }
+};
+exports.getTouresStats = async (req, res) => {
+  try {
+    const stats = await Tour.aggregate([
+      { $match: { ratingAverage: { $gte: 4.5 } } },
+      {
+        $group: {
+          // _id: '$ratingAverage',
+          // _id: '$difficulty',
+          _id: { $toUpper: '$difficulty' },
+          numTours: { $sum: 1 },
+          numRatings: { $sum: '$ratingQuantity' },
+          avgRating: { $avg: '$ratingAverage' },
+          avgPrice: { $avg: '$price' },
+          minPrice: { $min: '$price' },
+          maxPrice: { $max: '$price' },
+        },
+      },
+      { $sort: { avgPrice: 1 } },
+      // { $match: { _id: { $ne: 'EASY' } } },
+    ]);
+    res.status(200).json({
+      status: 'success',
+      data: { tour: stats },
+    });
   } catch (error) {
     res.status(400).json({ status: 'fail', message: 'Invalid Id Sent!' });
   }
