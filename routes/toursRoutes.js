@@ -7,6 +7,9 @@ const tourController = require('./../controllers/tourController');
 //Check body middleware for posted routes
 
 router
+  .route('/tour-5-cheap')
+  .get(tourController.aliasTopTours, tourController.getAllTours);
+router
   .route('/')
   .get(tourController.getAllTours)
   .post(tourController.createTour);
