@@ -8,7 +8,7 @@ const APIFeatures = require('../utils/apiFeatures');
 //   console.log(`This is Tour ID: ${val}`);
 //   const id = req.params.id * 1;
 //   if (id > tours.length) {
-//     return res.status(404).json({ status: 'fail', messasge: 'Invalid ID' });
+//     return res.status(404).json({ status: 'fail', message: 'Invalid ID' });
 //   }
 //   next();
 // };
@@ -131,6 +131,7 @@ exports.updateTour = async (req, res) => {
     res.status(400).json({ status: 'fail', message: 'Invalid Data Sent!' });
   }
 };
+
 exports.deleteTour = async (req, res) => {
   try {
     await Tour.findByIdAndDelete(req.params.id);
@@ -139,6 +140,7 @@ exports.deleteTour = async (req, res) => {
     res.status(400).json({ status: 'fail', message: 'Invalid Id Sent!' });
   }
 };
+
 exports.getTouresStats = async (req, res) => {
   try {
     const stats = await Tour.aggregate([
@@ -164,6 +166,41 @@ exports.getTouresStats = async (req, res) => {
       data: { tour: stats },
     });
   } catch (error) {
-    res.status(400).json({ status: 'fail', message: 'Invalid Id Sent!' });
+    res.status(400).json({ status: 'fail', message: 'Invalid!' });
+  }
+};
+
+exports.getMonthlyPlan = async (req, res) => {
+  try {
+    const year = req.params.year * 1; //2021
+    const plan = await Tour.aggregate([
+      {
+        $unwind: '$startDates',
+      },
+      {
+        $match: {
+          startDates: {
+            $gte: new Date(`${year}-01-01`),
+            $lte: new Date(`${year}-12-31`),
+          },
+        },
+      },
+      {
+        $group: {
+          _id: { $month: '$startDates' },
+          numToursStarts: { $sum: 1 },
+          tours: { $push: '$name' },
+        },
+      },
+      {
+        $addFields: { month: '$_id' },
+      },
+    ]);
+    res.status(200).json({
+      status: 'success',
+      data: { plan },
+    });
+  } catch (error) {
+    res.status(400).json({ status: 'fail', message: 'Invalid!' });
   }
 };
